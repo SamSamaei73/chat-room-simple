@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>چت روم ساده</title>
+  <style>
+    body { font-family: sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
+    #chat { background: #fff; padding: 10px; height: 300px; overflow-y: scroll; border: 1px solid #ccc; margin-bottom: 10px; }
+    input, button { font-size: 1rem; padding: 8px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h2>چت روم محلی</h2>
+  <div id="chat"></div>
+
+  <input type="text" id="msg" placeholder="پیامت رو بنویس...">
+  <button onclick="send()">ارسال</button>
+
+  <script>
+    const chatDiv = document.getElementById("chat");
+
+    function send() {
+      const msg = document.getElementById("msg").value;
+      if (!msg) return;
+      const chat = JSON.parse(localStorage.getItem("chat") || "[]");
+      chat.push({ msg, time: new Date().toLocaleTimeString() });
+      localStorage.setItem("chat", JSON.stringify(chat));
+      document.getElementById("msg").value = "";
+      load();
+    }
+
+    function load() {
+      const chat = JSON.parse(localStorage.getItem("chat") || "[]");
+      chatDiv.innerHTML = chat.map(item => `<p><b>${item.time}:</b> ${item.msg}</p>`).join('');
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    load();
+    setInterval(load, 2000); // هر ۲ ثانیه پیام‌ها رو چک کن
+  </script>
+</body>
+</html>
