@@ -2,41 +2,43 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>چت روم ساده</title>
+  <title>چت روم Gun.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
   <style>
-    body { font-family: sans-serif; direction: rtl; background: #f0f0f0; padding: 20px; }
-    #chat { background: #fff; padding: 10px; height: 300px; overflow-y: scroll; border: 1px solid #ccc; margin-bottom: 10px; }
-    input, button { font-size: 1rem; padding: 8px; margin-top: 5px; }
+    body { font-family: sans-serif; direction: rtl; background: #f7f7f7; padding: 20px; }
+    #chat { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background: white; margin-bottom: 10px; }
+    input, button { font-size: 1rem; padding: 8px; margin-top: 5px; width: 100%; box-sizing: border-box; }
+    h2 { text-align: center; }
   </style>
 </head>
 <body>
-  <h2>چت روم محلی</h2>
+  <h2>💬 چت‌روم ساده با Gun.js</h2>
   <div id="chat"></div>
 
-  <input type="text" id="msg" placeholder="پیامت رو بنویس...">
-  <button onclick="send()">ارسال</button>
+  <input type="text" id="msg" placeholder="پیام خود را وارد کنید...">
+  <button onclick="send()">ارسال پیام</button>
 
   <script>
+    const gun = Gun(); // شروع Gun.js
+    const room = gun.get('chat-room'); // تعریف یک اتاق چت
+
     const chatDiv = document.getElementById("chat");
 
     function send() {
       const msg = document.getElementById("msg").value;
-      if (!msg) return;
-      const chat = JSON.parse(localStorage.getItem("chat") || "[]");
-      chat.push({ msg, time: new Date().toLocaleTimeString() });
-      localStorage.setItem("chat", JSON.stringify(chat));
+      if (!msg.trim()) return;
+      room.set({ text: msg, time: new Date().toLocaleTimeString() });
       document.getElementById("msg").value = "";
-      load();
     }
 
-    function load() {
-      const chat = JSON.parse(localStorage.getItem("chat") || "[]");
-      chatDiv.innerHTML = chat.map(item => `<p><b>${item.time}:</b> ${item.msg}</p>`).join('');
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    }
-
-    load();
-    setInterval(load, 2000); // هر ۲ ثانیه پیام‌ها رو چک کن
+    room.map().on(data => {
+      if (data && data.text) {
+        const p = document.createElement("p");
+        p.innerHTML = `<b>${data.time}</b>: ${data.text}`;
+        chatDiv.appendChild(p);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      }
+    });
   </script>
 </body>
 </html>
